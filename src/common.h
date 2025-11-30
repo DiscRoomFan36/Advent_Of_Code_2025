@@ -106,7 +106,7 @@ internal void finish_timer(void) {
     u64 ms = (total_time_ns / MILLION ) % 1000;
     u64  s = (total_time_ns / BILLION ) % 1000;
 
-    printf("[[[[ -> time: %4lds, %4ldms, %4ldus, %4ldns <- ]]]]\n", s, ms, us, ns);
+    printf("[[[[ ->    time: %4lds, %4ldms, %4ldus, %4ldns    <- ]]]]\n", s, ms, us, ns);
 }
 
 

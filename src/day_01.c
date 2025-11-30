@@ -21,7 +21,7 @@ internal s64 solve_input(String input) {
 #define DAY "01"
 
 int main(void) {
-    printf("Solving Day %s!\n", DAY);
+    printf("                             Solving Day %s!\n", DAY);
     printf("======================================================================================\n");
 
     start_timer();

@@ -10,9 +10,24 @@
 #define RAYLIB_FOLDER       THIRDPARTY_FOLDER"raylib-5.5/"
 
 
+int day_sorting_function(const void *_a, const void *_b) {
+    String_View a = *(String_View*)_a;
+    String_View b = *(String_View*)_b;
+
+    a.data += a.count - 2; // only the last 2 chars
+    a.count = 2;
+
+    b.data += b.count - 2; // only the last 2 chars
+    b.count = 2;
+
+    int a_num = atoi(nob_temp_sv_to_cstr(a));
+    int b_num = atoi(nob_temp_sv_to_cstr(b));
+
+    return a_num-b_num;
+}
+
 
 Cmd cmd = {0};
-
 
 int main(int argc, char **argv) {
     NOB_GO_REBUILD_URSELF(argc, argv);
@@ -51,18 +66,38 @@ int main(int argc, char **argv) {
 
     mkdir_if_not_exists(BUILD_FOLDER);
 
-    const char *days[] = {
-        "day_01",
-    };
-    assert(ARRAY_LEN(days) > 0);
+
+    Nob_File_Paths src_folder_files = {};
+    if (!read_entire_dir(SRC_FOLDER, &src_folder_files)) return 1;
 
 
-    for (int i = 0; i < ARRAY_LEN(days); i++) {
-        const char *day = days[i];
+     typedef struct {
+        String_View *items;
+        size_t count;
+        size_t capacity;
+    } String_Array;
+
+
+    String_Array days = {};
+    for (int i = 0; i < src_folder_files.count; i++) {
+        String_View file = sv_from_cstr(src_folder_files.items[i]);
+        if (file.data[0] == '.')      continue;
+        if (!sv_end_with(file, ".c")) continue;
+        file.count -= 2; // remove the extention.
+        da_append(&days, file);
+    }
+    assert(days.count > 0);
+
+    // sort days by number.
+    qsort(days.items, days.count, sizeof(days.items[0]), day_sorting_function);
+
+
+    for (int i = 0; i < days.count; i++) {
+        String_View day = days.items[i];
 
 
         cmd_append(&cmd, "clang");
-        cmd_append(&cmd, "-std=gnu11");
+        // cmd_append(&cmd, "-std=gnu11");
 
         cmd_append(&cmd, "-Wall", "-Wextra");
         cmd_append(&cmd, "-Werror");
@@ -70,8 +105,8 @@ int main(int argc, char **argv) {
 
         cmd_append(&cmd, "-ggdb");
         // cmd_append(&cmd, "-O2");
-        cmd_append(&cmd, "-o",  temp_sprintf("%s%s", BUILD_FOLDER, "day_01"));
-        cmd_append(&cmd, temp_sprintf("%s%s", SRC_FOLDER, "day_01.c"));
+        cmd_append(&cmd, "-o",  temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(day)));
+        cmd_append(&cmd, temp_sprintf("%s"SV_Fmt".c", SRC_FOLDER, SV_Arg(day)));
         if (!cmd_run(&cmd)) return 1;
     }
 
@@ -80,20 +115,20 @@ int main(int argc, char **argv) {
 
 
     if (run_last_day) {
-        const char *last_day = days[ARRAY_LEN(days)-1];
+        String_View last_day = days.items[days.count-1];
 
         if (debug) cmd_append(&cmd, DEBUGGER_PATH);
-        cmd_append(&cmd, temp_sprintf("%s%s", BUILD_FOLDER, last_day));
+        cmd_append(&cmd, temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(last_day)));
 
         if (!cmd_run(&cmd)) return 1;
     }
 
     if (run_all) {
-        for (int i = 0; i < ARRAY_LEN(days); i++) {
-            const char *day = days[i];
+        for (int i = 0; i < days.count; i++) {
+            String_View day = days.items[i];
 
             if (debug) cmd_append(&cmd, DEBUGGER_PATH);
-            cmd_append(&cmd, temp_sprintf("%s%s", BUILD_FOLDER, day));
+            cmd_append(&cmd, temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(day)));
 
             if (!cmd_run(&cmd)) return 1;
         }
