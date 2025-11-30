@@ -9,7 +9,6 @@ internal s64 solve_input(String input) {
 
     s64 ints[] = {1, 2, 7, 3, 3, -1, 8, 2, 1, -65, 139, -75};
     Int_Array int_array = {.items = ints, .count = Array_Len(ints), .capacity = Array_Len(ints)};
-
     sort_int_array(&int_array);
 
     u64 y = 12;
@@ -18,6 +17,11 @@ internal s64 solve_input(String input) {
     String s = S("ballz");
     debug(s);
     debug(int_array);
+    u64 *p_y = &y;
+    debug(p_y);
+
+    Int_Array new_int_array = static_array_to_array(Int_Array, ints);
+    debug(new_int_array);
 
     return 0;
 }

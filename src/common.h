@@ -146,6 +146,9 @@ Make_Array(s64, Int_Array);
 
 
 
+#define static_array_to_array(array_type, xs) { .items = xs, .count = Array_Len(xs), .capacity = Array_Len(xs), .allocator = Scratch_Get() }
+
+
 
 s64 index_of(Int_Array array, s64 to_find) {
     for (u64 i = 0; i < array.count; i++) {
@@ -171,6 +174,10 @@ void sort_int_array(Int_Array *array) {
 
 
 
+
+////////////////////////////////////////////////////////////////
+//                       Debug print.
+////////////////////////////////////////////////////////////////
 
 
 void print_s64   (void *_x) { s64 x    = *(s64*)   _x; printf("%ld", x); }
@@ -204,21 +211,20 @@ void print_int_array(void *_array) {
 
 
 
-#define debug(x)                                            \
-    do {                                                    \
-        printf("DEBUG: %s = ", #x);                         \
-        _Generic(x,                                         \
-            s64: print_s64(&x),  u64: print_u64(&x),        \
-            s32: print_s32(&x),  u32: print_u32(&x),        \
-            s16: print_s16(&x),  u16: print_u16(&x),        \
-            s8 : print_s8 (&x),  u8 : print_u8 (&x),        \
-            f32: print_f32(&x),  f64: print_f64(&x),        \
-            String: print_string(&x),                       \
-            Int_Array: print_int_array(&x),                 \
-            default: printf("?UNKNOWN_TYPE?")               \
-        );                                                  \
-        printf("\n");                                       \
-    } while (0)
+#define generic_print(x)                                    \
+    _Generic(x,                                             \
+        s64: print_s64(&x),  u64: print_u64(&x),            \
+        s32: print_s32(&x),  u32: print_u32(&x),            \
+        s16: print_s16(&x),  u16: print_u16(&x),            \
+        s8 : print_s8 (&x),  u8 : print_u8 (&x),            \
+        f32: print_f32(&x),  f64: print_f64(&x),            \
+        String: print_string(&x),                           \
+        Int_Array: print_int_array(&x),                     \
+        default: printf("?UNKNOWN_TYPE?")                   \
+    )
+
+
+#define debug(x)  do { printf("DEBUG: %s = ", #x); generic_print(x); printf("\n"); } while (0)
 
 
 
