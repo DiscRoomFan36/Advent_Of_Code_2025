@@ -16,11 +16,15 @@ int main(void) {
     printf("Solving Day %s!\n", DAY);
     printf("======================================================================================\n");
 
-    s64 example = solve_input(Get_Example());
-    printf("    example = %ld\n", example);
+    start_timer();
+        s64 example = solve_input(Get_Example());
+        printf("    example = %ld\n", example);
+    finish_timer();
 
-    // s64 input   = solve_input(Get_Input());
-    // printf("    input   = %ld\n", input);
+    // start_timer();
+    //     s64 input   = solve_input(Get_Input());
+    //     printf("    input   = %ld\n", input);
+    // finish_timer();
 
     printf("======================================================================================\n");
     Scratch_Free();

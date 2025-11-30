@@ -91,6 +91,25 @@ internal String file_name_to_example_or_input(String filename, bool get_example)
 
 
 
+global_variable u64 timer_start = 0;
+void start_timer(void) {
+    timer_start = nanoseconds_since_unspecified_epoch();
+}
+
+void finish_timer(void) {
+    u64 timer_end = nanoseconds_since_unspecified_epoch();
+
+    u64 total_time_ns = timer_end - timer_start;
+
+    u64 ns = (total_time_ns           ) % 1000;
+    u64 us = (total_time_ns / THOUSAND) % 1000;
+    u64 ms = (total_time_ns / MILLION ) % 1000;
+    u64  s = (total_time_ns / BILLION ) % 1000;
+
+    printf("[[[[ -> time: %4lds, %4ldms, %4ldus, %4ldns <- ]]]]\n", s, ms, us, ns);
+}
+
+
 
 ///////////////////////////////////////////////////
 //         Common data structures
