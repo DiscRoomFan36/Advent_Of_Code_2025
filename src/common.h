@@ -3,7 +3,7 @@
 
 
 #define BESTED_IMPLEMENTATION
-#include "Bested.h"
+#include "../thirdparty/Bested.h"
 
 
 global_variable Arena_Pool _pool = ZEROED;
@@ -112,8 +112,10 @@ internal void finish_timer(void) {
 
 
 ///////////////////////////////////////////////////
-//         Common data structures
+//                     Helpers
 ///////////////////////////////////////////////////
+
+
 
 #define Make_Array(type, name)      \
     typedef struct {                \
@@ -169,16 +171,58 @@ void sort_int_array(Int_Array *array) {
 
 
 
-#define print_int_array(array) do { printf("%s = ", #array); _print_int_array(array); } while (0)
 
-void _print_int_array(Int_Array array) {
+
+void print_s64   (void *_x) { s64 x    = *(s64*)   _x; printf("%ld", x); }
+void print_u64   (void *_x) { u64 x    = *(u64*)   _x; printf("%ld", x); }
+
+void print_s32   (void *_x) { s32 x    = *(s32*)   _x; printf("%d",  x); }
+void print_u32   (void *_x) { u32 x    = *(u32*)   _x; printf("%d",  x); }
+
+void print_s16   (void *_x) { s16 x    = *(s16*)   _x; printf("%d",  x); }
+void print_u16   (void *_x) { u16 x    = *(u16*)   _x; printf("%d",  x); }
+
+void print_s8    (void *_x) { s8  x    = *(s8 *)   _x; printf("%d",  x); }
+void print_u8    (void *_x) { u8  x    = *(u8 *)   _x; printf("%d",  x); }
+
+void print_f32   (void *_x) { f32 x    = *(f32*)   _x; printf("%f",  x); }
+void print_f64   (void *_x) { f64 x    = *(f64*)   _x; printf("%f",  x); }
+
+
+void print_string(void *_x) { String x = *(String*)_x; printf("\""S_Fmt"\"", S_Arg(x)); }
+
+
+void print_int_array(void *_array) {
+    Int_Array array = *(Int_Array*)_array;
     printf("{\n    ");
     for (u64 i = 0; i < array.count; i++) {
         if (i != 0 && i % 10 == 0) printf("\n    ");
         printf("%6ld, ", array.items[i]);
     }
-    printf("\n}\n");
+    printf("\n}");
 }
+
+
+
+#define debug(x)                                            \
+    do {                                                    \
+        printf("DEBUG: %s = ", #x);                         \
+        _Generic(x,                                         \
+            s64: print_s64(&x),  u64: print_u64(&x),        \
+            s32: print_s32(&x),  u32: print_u32(&x),        \
+            s16: print_s16(&x),  u16: print_u16(&x),        \
+            s8 : print_s8 (&x),  u8 : print_u8 (&x),        \
+            f32: print_f32(&x),  f64: print_f64(&x),        \
+            String: print_string(&x),                       \
+            Int_Array: print_int_array(&x),                 \
+            default: printf("?UNKNOWN_TYPE?")               \
+        );                                                  \
+        printf("\n");                                       \
+    } while (0)
+
+
+
+
 
 
 

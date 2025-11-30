@@ -10,9 +10,14 @@ internal s64 solve_input(String input) {
     s64 ints[] = {1, 2, 7, 3, 3, -1, 8, 2, 1, -65, 139, -75};
     Int_Array int_array = {.items = ints, .count = Array_Len(ints), .capacity = Array_Len(ints)};
 
-    // print_int_array(int_array);
     sort_int_array(&int_array);
-    // print_int_array(int_array);
+
+    u64 y = 12;
+    debug(y);
+    debug(int_array.items[0]);
+    String s = S("ballz");
+    debug(s);
+    debug(int_array);
 
     return 0;
 }
@@ -29,10 +34,10 @@ int main(void) {
         printf("    example = %ld\n", example);
     finish_timer();
 
-    start_timer();
-        s64 input   = solve_input(Get_Input());
-        printf("    input   = %ld\n", input);
-    finish_timer();
+    // start_timer();
+    //     s64 input   = solve_input(Get_Input());
+    //     printf("    input   = %ld\n", input);
+    // finish_timer();
 
     printf("======================================================================================\n");
     Scratch_Free();
