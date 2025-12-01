@@ -4,25 +4,15 @@
 #include "common.h"
 
 
-#define Proper_Mod(x, y) ((((x) % (y)) + (y)) % (y))
-
-typedef struct {
-    s64 part_1;
-    s64 part_2;
-} Solution;
-
 internal Solution solve_input(String input) {
+    String_Array lines = string_to_null_terminated_lines(input, true);
+
     s32 safe_number = 50;
     s64 number_of_0s_hit = 0;
     s64 number_of_perfect_0s = 0;
-    u64 num = 0;
 
-    while (true) {
-        String line = String_Get_Next_Line(&input, &num, SGNL_All);
-        if (line.length == 0) break;
-
-
-        line.data[line.length] = 0;
+    for (u64 k = 0; k < lines.count; k++) {
+        String line = lines.items[k];
 
         char l_or_r;
         s32 number;
@@ -59,32 +49,6 @@ internal Solution solve_input(String input) {
 
 
 #define DAY "01"
-
-
-
-#define Do_Example(part_1_solution, part_2_solution)                                                    \
-    do {                                                                                                \
-        start_timer();                                                                                  \
-            Solution example = solve_input(Get_Example());                                              \
-        finish_timer();                                                                                 \
-                                                                                                        \
-        printf("    example:\n");                                                                       \
-        printf("        part 1: %18ld,    correct: %18ld\n", example.part_1, (s64)part_1_solution);     \
-        printf("        part 2: %18ld,    correct: %18ld\n", example.part_2, (s64)part_2_solution);     \
-    } while (0)
-
-
-#define Do_Input()                                              \
-    do {                                                        \
-        start_timer();                                          \
-            Solution input = solve_input(Get_Input());          \
-        finish_timer();                                         \
-                                                                \
-        printf("    input  :\n");                               \
-        printf("        part 1: %18ld\n", input.part_1);        \
-        printf("        part 2: %18ld\n", input.part_2);        \
-    } while (0)
-
 
 
 int main(void) {

@@ -111,6 +111,44 @@ internal void finish_timer(void) {
 
 
 
+
+
+#define Proper_Mod(x, y) ((((x) % (y)) + (y)) % (y))
+
+typedef struct {
+    s64 part_1;
+    s64 part_2;
+} Solution;
+
+
+
+#define Do_Example(part_1_solution, part_2_solution)                                                        \
+    do {                                                                                                    \
+        start_timer();                                                                                      \
+            Solution example = solve_input(Get_Example());                                                  \
+        finish_timer();                                                                                     \
+                                                                                                            \
+        printf("    example:\n");                                                                           \
+        printf("        part 1: |%18ld|,   correct: |%18ld|\n", example.part_1, (s64)part_1_solution);     \
+        printf("        part 2: |%18ld|,   correct: |%18ld|\n", example.part_2, (s64)part_2_solution);     \
+    } while (0)
+
+
+#define Do_Input()                                              \
+    do {                                                        \
+        start_timer();                                          \
+            Solution input = solve_input(Get_Input());          \
+        finish_timer();                                         \
+                                                                \
+        printf("    input  :\n");                               \
+        printf("        part 1: |%18ld|\n", input.part_1);      \
+        printf("        part 2: |%18ld|\n", input.part_2);      \
+    } while (0)
+
+
+
+
+
 ///////////////////////////////////////////////////
 //                     Helpers
 ///////////////////////////////////////////////////
@@ -126,6 +164,7 @@ internal void finish_timer(void) {
 
 
 Make_Array(s64, Int_Array);
+Make_Array(String, String_Array);
 
 
 #define Array_Swap(array, i, j)                                 \
@@ -147,6 +186,27 @@ Make_Array(s64, Int_Array);
 
 
 #define static_array_to_array(array_type, xs) { .items = xs, .count = Array_Len(xs), .capacity = Array_Len(xs), .allocator = Scratch_Get() }
+
+
+// modifies the input string
+String_Array string_to_null_terminated_lines(String input, bool skip_empty) {
+    String_Array result = ZEROED;
+    result.allocator = Scratch_Get();
+
+    String_Get_Next_Line_Flag flag = SGNL_Trim;
+    if (skip_empty) flag |= SGNL_Skip_Empty;
+
+    while (true) {
+        String line = String_Get_Next_Line(&input, NULL, flag);
+        if (line.length == 0) break;
+
+        line.data[line.length] = 0;
+        Array_Append(&result, line);
+    }
+
+    return result;
+}
+
 
 
 
