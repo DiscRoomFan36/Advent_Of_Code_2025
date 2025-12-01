@@ -80,7 +80,7 @@ internal String file_name_to_example_or_input(String filename, bool get_example)
 
     String result = temp_read_entire_file(file_to_load);
     if (result.length == 0) {
-        // PANIC("COULD NOT LOAD FILE %s", file_to_load);
+        PANIC("COULD NOT LOAD FILE %s", file_to_load);
     }
     return result;
 }
