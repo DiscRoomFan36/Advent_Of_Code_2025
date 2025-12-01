@@ -8,8 +8,8 @@ internal Solution solve_input(String input) {
     String_Array lines = string_to_null_terminated_lines(input, true);
 
     s32 safe_number = 50;
-    s64 number_of_0s_hit = 0;
-    s64 number_of_perfect_0s = 0;
+    s32 number_of_0s_hit = 0;
+    s32 number_of_perfect_0s = 0;
 
     for (u64 k = 0; k < lines.count; k++) {
         String line = lines.items[k];
@@ -21,13 +21,13 @@ internal Solution solve_input(String input) {
         bool going_down = (l_or_r == 'L');
 
         // anything bigger than 100 just loops on itself...
-        // if (number >= 100) {
-            number_of_0s_hit += number / 100;
-            number            = number % 100;
-        // }
+        number_of_0s_hit += number / 100;
+        number            = number % 100;
 
 
         s32 new_safe_number = safe_number + (going_down ? -number : number);
+
+        if (new_safe_number % 100 == 0) number_of_perfect_0s += 1;
 
         if (going_down) {
             if (new_safe_number < 0) {
@@ -39,9 +39,7 @@ internal Solution solve_input(String input) {
             if (new_safe_number >= 100) number_of_0s_hit += 1;
         }
 
-
-        safe_number = Proper_Mod(new_safe_number, 100);
-        if (safe_number == 0) number_of_perfect_0s += 1;
+        safe_number = (new_safe_number + 100) % 100;
     }
 
     Solution solution = {
