@@ -33,9 +33,10 @@ int main(int argc, char **argv) {
     NOB_GO_REBUILD_URSELF(argc, argv);
 
 
-    bool debug        = false;
-    bool run_all      = false;
-    bool run_last_day = false;
+    bool debug             = false;
+    bool run_all           = false;
+    bool run_last_day      = false;
+    bool turn_on_optimizer = false;
 
     // handle arguments
     for (int i = 1; i < argc; i++) {
@@ -51,6 +52,8 @@ int main(int argc, char **argv) {
             } else {
                 run_all = true;
             }
+        } else if (strcmp(text, "optimize") == 0) {
+            turn_on_optimizer = true;
         }
     }
 
@@ -100,11 +103,12 @@ int main(int argc, char **argv) {
         // cmd_append(&cmd, "-std=gnu11");
 
         cmd_append(&cmd, "-Wall", "-Wextra");
-        cmd_append(&cmd, "-Werror");
+        // cmd_append(&cmd, "-Werror");
         cmd_append(&cmd, "-I"THIRDPARTY_FOLDER);
 
-        cmd_append(&cmd, "-ggdb");
-        // cmd_append(&cmd, "-O2");
+        if (turn_on_optimizer) cmd_append(&cmd, "-O2");
+        else                   cmd_append(&cmd, "-ggdb");
+
         cmd_append(&cmd, "-o",  temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(day)));
         cmd_append(&cmd, temp_sprintf("%s"SV_Fmt".c", SRC_FOLDER, SV_Arg(day)));
         if (!cmd_run(&cmd)) return 1;
