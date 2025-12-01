@@ -20,8 +20,11 @@ internal s64 solve_input(String input) {
     u64 *p_y = &y;
     debug(p_y);
 
+    // debug_break();
+
     Int_Array new_int_array = static_array_to_array(Int_Array, ints);
     debug(new_int_array);
+
 
     return 0;
 }

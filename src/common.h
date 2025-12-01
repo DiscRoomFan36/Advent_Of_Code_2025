@@ -179,6 +179,8 @@ void sort_int_array(Int_Array *array) {
 //                       Debug print.
 ////////////////////////////////////////////////////////////////
 
+// TODO put in bested.h
+
 
 void print_s64   (void *_x) { s64 x    = *(s64*)   _x; printf("%ld", x); }
 void print_u64   (void *_x) { u64 x    = *(u64*)   _x; printf("%ld", x); }
@@ -227,6 +229,7 @@ void print_int_array(void *_array) {
 #define debug(x)  do { printf("DEBUG: %s = ", #x); generic_print(x); printf("\n"); } while (0)
 
 
+#define debug_break() asm("int3")
 
 
 
