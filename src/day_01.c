@@ -18,21 +18,27 @@ internal Solution solve_input(String input) {
         s32 number;
         ASSERT(sscanf(line.data, "%c%d", &l_or_r, &number) == 2);
 
+        bool going_down = (l_or_r == 'L');
 
-        s32 new_safe_number = safe_number;
-        if (l_or_r == 'L') {
-            new_safe_number -= number;
+        // anything bigger than 100 just loops on itself...
+        if (number >= 100) {
+            number_of_0s_hit += number / 100;
+            number            = number % 100;
+        }
 
-            for (s32 i = safe_number - 1; i >= new_safe_number; i -= 1) {
-                if (i % 100 == 0) number_of_0s_hit += 1;
+
+        s32 new_safe_number = safe_number + (going_down ? -number : number);
+
+        if (going_down) {
+            if (new_safe_number < 0) {
+                if (safe_number != 0) number_of_0s_hit += 1;
+            } else {
+                if (new_safe_number == 0) number_of_0s_hit += 1;
             }
         } else {
-            new_safe_number += number;
-
-            for (s32 i = safe_number + 1; i <= new_safe_number; i += 1) {
-                if (i % 100 == 0) number_of_0s_hit += 1;
-            }
+            if (new_safe_number >= 100) number_of_0s_hit += 1;
         }
+
 
         safe_number = Proper_Mod(new_safe_number, 100);
         if (safe_number == 0) number_of_perfect_0s += 1;
