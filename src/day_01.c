@@ -21,10 +21,10 @@ internal Solution solve_input(String input) {
         bool going_down = (l_or_r == 'L');
 
         // anything bigger than 100 just loops on itself...
-        if (number >= 100) {
+        // if (number >= 100) {
             number_of_0s_hit += number / 100;
             number            = number % 100;
-        }
+        // }
 
 
         s32 new_safe_number = safe_number + (going_down ? -number : number);
