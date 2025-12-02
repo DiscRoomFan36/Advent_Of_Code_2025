@@ -4,26 +4,8 @@
 #include "common.h"
 
 
-Make_Array(u8, u8_Array);
-
-#define Array_Eq(array, i, j) ((array).items[(i)] == (array).items[(j)])
 
 
-internal u32 int_log_10(u64 n) {
-    u32 result = 0;
-    while (n > 0) {
-        result += 1;
-        n /= 10;
-    }
-    return result;
-}
-
-internal u64 int_pow(u64 x, u64 y) {
-    u64 result = 1;
-    // TODO do the fast thing.
-    for (u64 i = 0; i < y; i++) result *= x;
-    return result;
-}
 
 typedef struct {
     u64 start, end;
@@ -31,7 +13,7 @@ typedef struct {
 Make_Array(Range, Range_Array);
 
 
-bool number_is_invalid_id_group_2(u64 n) {
+internal bool number_is_invalid_id_group_2(u64 n) {
     u32 log_10 = int_log_10(n);
     u64 pow_10 = int_pow(10, log_10/2);
     return (n % pow_10) == (n / pow_10);
@@ -40,7 +22,6 @@ bool number_is_invalid_id_group_2(u64 n) {
 
 
 internal Solution solve_input(String input) {
-
     // replace (,) with (\n), so we can pass it though the split function.
     for (u32 i = 0; i < input.length; i++) {
         if (input.data[i] == ',') input.data[i] = '\n';

@@ -183,6 +183,9 @@ Make_Array(String, String_Array);
         }                                               \
     } while (0)
 
+#define Array_Eq(array, i, j) ((array).items[(i)] == (array).items[(j)])
+
+
 
 
 #define static_array_to_array(array_type, xs) { .items = xs, .count = Array_Len(xs), .capacity = Array_Len(xs), .allocator = Scratch_Get() }
@@ -264,6 +267,68 @@ u64 binary_search(Int_Array array, s64 x) {
         }
     }
     return low;
+}
+
+
+
+
+
+u32 int_log_10(u64 x) {
+    u32 result = 0;
+    while (x > 0) { result += 1; x /= 10; }
+    return result;
+}
+
+u32 int_log_2(u64 x) {
+    u32 result = 0;
+    while (x > 0) { result += 1; x /=  2; }
+    return result;
+}
+
+u32 int_log_n(u64 x, u64 n) {
+    // these are much faster because constant division is faster.
+    if (n == 2)  return int_log_2 (x);
+    if (n == 10) return int_log_10(x);
+
+    u32 result = 0;
+    while (x > 0) { result += 1; x /=  n; }
+    return result;
+}
+
+
+
+// dose the fast thing.
+s64 int_pow(s64 x, u64 y) {
+    if (x == 0) return 0;
+
+    s64 result = 1;
+    s64 keep_squaring = x;
+    while (y != 0) {
+        if (y & 1) result *= keep_squaring;
+        y = y >> 1;
+        keep_squaring = keep_squaring*keep_squaring;
+    }
+
+    return result;
+}
+
+f64 f64_int_pow(f64 x, s64 y) {
+    if (x == 0) return 0;
+
+    if (y < 0) {
+        x = 1 / x;
+        y = -y;
+    }
+
+    f64 result = 1;
+    f64 keep_squaring = x;
+    while (y != 0) {
+        if (y & 1) result *= keep_squaring;
+        y = y >> 1;
+        keep_squaring = keep_squaring*keep_squaring;
+    }
+
+    return result;
 }
 
 
