@@ -215,6 +215,7 @@ String_Array string_to_null_terminated_lines(String input, bool skip_empty) {
 typedef struct {
     Arena *allocator;
     bool trim_lines;
+    bool keep_empty_last_line;
 } string_split_by_Opt;
 
 #define string_split_by(input, split_by, ...) _string_split_by((input), split_by, (string_split_by_Opt){ __VA_ARGS__ })
@@ -233,10 +234,16 @@ String_Array _string_split_by(String input, const char *split_by, string_split_b
             break;
         }
 
-        String advanced = String_Advanced(input, index + 1);
+        String advanced = String_Advanced(input, index + needle.length);
         input.length = index;
         Array_Append(&result, input);
         input = advanced;
+    }
+
+    if (result.items[result.count-1].length == 0) {
+        if (!opt.keep_empty_last_line) {
+            result.count -= 1;
+        }
     }
 
     // null terminate all strings.

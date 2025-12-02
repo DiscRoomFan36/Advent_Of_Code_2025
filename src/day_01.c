@@ -5,7 +5,7 @@
 
 
 internal Solution solve_input(String input) {
-    String_Array lines = string_to_null_terminated_lines(input, true);
+    String_Array lines = string_split_by(input, "\n");
 
     s32 safe_number = 50;
     s32 number_of_0s_hit = 0;
