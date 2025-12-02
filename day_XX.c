@@ -4,15 +4,28 @@
 #include "common.h"
 
 
+typedef struct {
+    char charater;
+    s64 number;
+} Input_Line;
+Make_Array(Input_Line, Input_Line_Array)
+
+
 internal Solution solve_input(String input) {
+
+    Input_Line_Array inputs = { .allocator = Scratch_Get() };
+
     String_Array lines = string_to_null_terminated_lines(input, true);
+    for (u64 line_index = 0; line_index < lines.count; line_index++) {
+        String line = lines.items[line_index];
 
-    for (u64 k = 0; k < lines.count; k++) {
-        String line = lines.items[k];
+        Input_Line input_line;
+        ASSERT(sscanf(line.data, "%c%d", &input_line.character, &input_line.number) == 2);
+        Array_Append(&inputs, input_line);
+    }
 
-        char character;
-        s32 number;
-        ASSERT(sscanf(line.data, "%c%d", &character, &number) == 2);
+    for (u64 inputs_index = 0; inputs_index < inputs.count; inputs_index++) {
+        Input_Line input_line = inputs.items[inputs_index];
     }
 
     Solution solution = {
