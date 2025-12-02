@@ -4,8 +4,14 @@
 #include "common.h"
 
 
+Make_Array(u8, u8_Array);
+
+#define Array_Eq(array, i, j) ((array).items[(i)] == (array).items[(j)])
+
+
 internal Solution solve_input(String input) {
 
+    // replace (,) with (\n), so we can pass it though the split function.
     for (u32 i = 0; i < input.length; i++) {
         if (input.data[i] == ',') input.data[i] = '\n';
     }
@@ -13,22 +19,24 @@ internal Solution solve_input(String input) {
     s64 invalid_id_sum = 0;
     s64 extra_invalid_id_sum = 0;
 
-    Int_Array digits = ZEROED;
+    u8_Array digits = ZEROED;
     digits.allocator = Scratch_Get();
+    Array_Reserve(&digits, 32);
 
     String_Array lines = string_to_null_terminated_lines(input, true);
-    for (u64 k = 0; k < lines.count; k++) {
-        String line = lines.items[k];
+    for (u64 line_index = 0; line_index < lines.count; line_index++) {
+        String line = lines.items[line_index];
 
-
-        s64 start, end;
+        u64 start, end;
         ASSERT(sscanf(line.data, "%ld-%ld", &start, &end) == 2);
 
 
         for (u64 i = start; i <= end; i++) {
+            // total_iterations = 1943348
+
             digits.count = 0;
 
-            u32 int_log_10 = 0;
+            // put the digits into an array.
             u64 n = i;
             while (n > 0) {
                 u64 div = n / 10;
@@ -41,16 +49,18 @@ internal Solution solve_input(String input) {
 
             // part 1
             if (digits.count % 2 == 0) {
-                bool flag = true;
-                for (u32 j = 0; j < digits.count/2; j++) {
-                    u32 l = digits.count/2+j;
-                    if (digits.items[j] != digits.items[l]) {
-                        flag = false;
+                u32 group_size = digits.count/2;
+
+                // looping backwards is faster, checks the first digit faster.
+                bool the_same = true;
+                for (s32 j = group_size - 1; j >= 0; j--) {
+                    if (!Array_Eq(digits, j, j + group_size)) {
+                        the_same = false;
                         break;
                     }
                 }
-                if (flag) {
-                    // debug(i);
+
+                if (the_same) {
                     invalid_id_sum       += i;
                     extra_invalid_id_sum += i;
                     continue;
@@ -60,34 +70,29 @@ internal Solution solve_input(String input) {
 
             // handle 3 or more.
             //
-            // j == number of repeats
+            // j == number of groups
             for (u32 j = 3; j <= digits.count; j++) {
-                // the patern wont fit into the array perfectly
+                // the patern won't fit into the array perfectly
                 if (digits.count % j != 0) continue;
 
                 u32 group_size = digits.count / j;
+                bool is_same = true;
 
-                bool flag = true;
                 // check all the groups are the same.
-                for (u32 l = 1; l < j; l++) {
-
-                    for (u32 m = 0; m < group_size; m++) {
-                        s64 n1 = digits.items[l     * group_size + m];
-                        s64 n2 = digits.items[(l-1) * group_size + m];
-
-                        if (n1 != n2) {
-                            flag = false;
-                            break;
+                for (s32 l = j-2; l >= 0; l--) {
+                    for (s32 m = group_size-1; m >= 0; m--) {
+                        if (!Array_Eq(digits, l * group_size + m, (l+1) * group_size + m)) {
+                            is_same = false;
+                            goto continue_ounter_loop;
                         }
                     }
-
-                    if (!flag) break;
                 }
 
-                if (flag) {
+                if (is_same) {
                     extra_invalid_id_sum += i;
                     break; // dont check more sizes
                 }
+                continue_ounter_loop:;
             }
 
         }
