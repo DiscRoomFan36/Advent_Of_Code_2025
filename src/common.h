@@ -214,7 +214,7 @@ String_Array string_to_null_terminated_lines(String input, bool skip_empty) {
 
 typedef struct {
     Arena *allocator;
-    bool trim_lines;
+    bool dont_trim_lines;
     bool keep_empty_last_line;
 } string_split_by_Opt;
 
@@ -249,7 +249,7 @@ String_Array _string_split_by(String input, const char *split_by, string_split_b
     // null terminate all strings.
     for (u64 i = 0; i < result.count; i++) {
         String line = result.items[i];
-        if (opt.trim_lines) line = String_Trim_Right(line);
+        if (!opt.dont_trim_lines) line = String_Trim_Right(line);
 
         result.items[i] = String_Duplicate(result.allocator, line, .null_terminate = true);
     }

@@ -25,7 +25,7 @@ internal Solution solve_input(String input) {
 
     Range_Array ranges = { .allocator = Scratch_Get() };
 
-    String_Array lines = string_split_by(input, ",", .trim_lines = true);
+    String_Array lines = string_split_by(input, ",");
     for (u64 line_index = 0; line_index < lines.count; line_index++) {
         String line = lines.items[line_index];
 
