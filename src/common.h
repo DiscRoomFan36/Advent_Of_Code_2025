@@ -223,7 +223,9 @@ s64 index_of(Int_Array array, s64 to_find) {
 int compare_ints(const void *_a, const void *_b) {
     s64 a = *(s64*)_a;
     s64 b = *(s64*)_b;
-    return a-b;
+    if      (a < b)  return -1;
+    else if (a > b)  return  1;
+    else             return  0;
 }
 
 // smallest to largest
@@ -231,6 +233,38 @@ void sort_int_array(Int_Array *array) {
     qsort(array->items, array->count, sizeof(array->items[0]), compare_ints);
 }
 
+void debug_print_around(Int_Array array, s64 low, s64 high) {
+    low = Max(low, 0);
+    high = Min(high, (s64)array.count-1);
+    printf("DEBUG around:\n");
+    for (s64 i = low; i <= high; i++) {
+        printf("    %ld: %ld\n", i, array.items[i]);
+    }
+}
+
+
+u64 binary_search(Int_Array array, s64 x) {
+    s64 low = 0;
+    s64 high = array.count-1;
+    while (low <= high) {
+        s64 mid = low + (high - low) / 2;
+
+        // Check if x is present at mid
+        // if (all_invalid_ids.items[mid] == range.start) {
+        //     break;
+        // }
+
+        if (array.items[mid] < x) {
+            // If x greater, ignore left half
+            low = mid + 1;
+
+        } else {
+            // If x is smaller, ignore right half
+            high = mid - 1;
+        }
+    }
+    return low;
+}
 
 
 
