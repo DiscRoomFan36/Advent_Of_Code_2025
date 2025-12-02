@@ -212,6 +212,46 @@ String_Array string_to_null_terminated_lines(String input, bool skip_empty) {
 
 
 
+typedef struct {
+    Arena *allocator;
+    bool trim_lines;
+} string_split_by_Opt;
+
+#define string_split_by(input, split_by, ...) _string_split_by((input), split_by, (string_split_by_Opt){ __VA_ARGS__ })
+
+String_Array _string_split_by(String input, const char *split_by, string_split_by_Opt opt) {
+    String needle = S(split_by);
+
+    String_Array result = ZEROED;
+    if (opt.allocator)  result.allocator = opt.allocator;
+    else                result.allocator = Scratch_Get();
+
+    while (true) {
+        s64 index = String_Find_Index_Of(input, needle);
+        if (index == -1) {
+            Array_Append(&result, input);
+            break;
+        }
+
+        String advanced = String_Advanced(input, index + 1);
+        input.length = index;
+        Array_Append(&result, input);
+        input = advanced;
+    }
+
+    // null terminate all strings.
+    for (u64 i = 0; i < result.count; i++) {
+        String line = result.items[i];
+        if (opt.trim_lines) line = String_Trim_Right(line);
+
+        result.items[i] = String_Duplicate(result.allocator, line, .null_terminate = true);
+    }
+
+    return result;
+}
+
+
+
 
 s64 index_of(Int_Array array, s64 to_find) {
     for (u64 i = 0; i < array.count; i++) {
@@ -370,6 +410,16 @@ void print_int_array(void *_array) {
     printf("\n}");
 }
 
+void print_string_array(void *_array) {
+    String_Array array = *(String_Array*)_array;
+    printf("{\n");
+    for (u64 i = 0; i < array.count; i++) {
+        printf("    ");
+        print_string(&array.items[i]);
+        printf(",\n");
+    }
+    printf("}");
+}
 
 
 #define generic_print(x)                                    \
@@ -381,6 +431,7 @@ void print_int_array(void *_array) {
         f32: print_f32(&x),  f64: print_f64(&x),            \
         String: print_string(&x),                           \
         Int_Array: print_int_array(&x),                     \
+        String_Array: print_string_array(&x),               \
         default: printf("?UNKNOWN_TYPE?")                   \
     )
 

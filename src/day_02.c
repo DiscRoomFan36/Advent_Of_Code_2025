@@ -22,14 +22,10 @@ internal bool number_is_invalid_id_group_2(u64 n) {
 
 
 internal Solution solve_input(String input) {
-    // replace (,) with (\n), so we can pass it though the split function.
-    for (u32 i = 0; i < input.length; i++) {
-        if (input.data[i] == ',') input.data[i] = '\n';
-    }
 
     Range_Array ranges = { .allocator = Scratch_Get() };
 
-    String_Array lines = string_to_null_terminated_lines(input, true);
+    String_Array lines = string_split_by(input, ",", .trim_lines = true);
     for (u64 line_index = 0; line_index < lines.count; line_index++) {
         String line = lines.items[line_index];
 
