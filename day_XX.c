@@ -5,10 +5,10 @@
 
 
 typedef struct {
-    char charater;
+    char character;
     s64 number;
 } Input_Line;
-Make_Array(Input_Line, Input_Line_Array)
+Make_Array(Input_Line, Input_Line_Array);
 
 
 internal Solution solve_input(String input) {
@@ -16,7 +16,7 @@ internal Solution solve_input(String input) {
     Input_Line_Array inputs = { .allocator = Scratch_Get() };
 
 
-    String_Array lines = string_split_by(input, ",");
+    String_Array lines = string_split_by(input, "\n");
     for (u64 line_index = 0; line_index < lines.count; line_index++) {
         String line = lines.items[line_index];
 
