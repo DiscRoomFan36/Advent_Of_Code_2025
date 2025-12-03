@@ -94,7 +94,7 @@ int main(int argc, char **argv) {
     // sort days by number.
     qsort(days.items, days.count, sizeof(days.items[0]), day_sorting_function);
 
-
+    Procs procs = {0};
     for (int i = 0; i < days.count; i++) {
         String_View day = days.items[i];
 
@@ -111,12 +111,13 @@ int main(int argc, char **argv) {
 
         cmd_append(&cmd, "-o",  temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(day)));
         cmd_append(&cmd, temp_sprintf("%s"SV_Fmt".c", SRC_FOLDER, SV_Arg(day)));
-        if (!cmd_run(&cmd)) return 1;
+        if (!cmd_run(&cmd, .async = &procs)) return 1;
     }
+
+    if (!procs_wait(procs)) return 1;
 
 
     #define DEBUGGER_PATH "/home/fletcher/Thirdpary/gf/gf2"
-
 
     if (run_last_day) {
         String_View last_day = days.items[days.count-1];
