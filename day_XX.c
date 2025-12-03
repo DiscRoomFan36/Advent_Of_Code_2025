@@ -25,9 +25,11 @@ internal Solution solve_input(String input) {
         Array_Append(&inputs, input_line);
     }
 
+
     for (u64 inputs_index = 0; inputs_index < inputs.count; inputs_index++) {
         Input_Line input_line = inputs.items[inputs_index];
     }
+
 
     Solution solution = {
         .part_1 = 0,
