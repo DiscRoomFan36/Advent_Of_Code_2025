@@ -2,6 +2,16 @@
 
 
 
+// make these defaults different for this project.
+//
+// A bigger Arena and array will reduce the
+// number of times it has to reallocate.
+
+#define ARENA_REGION_DEFAULT_CAPACITY   (32 * MEGABYTE)
+#define ARRAY_INITAL_CAPACITY           512
+
+
+
 #define BESTED_IMPLEMENTATION
 #include "../thirdparty/Bested.h"
 
