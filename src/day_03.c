@@ -36,12 +36,10 @@ internal s64 find_largest_jolts(Int_Array array, u32 depth) {
 
 
 internal Solution solve_input(String input) {
-
-    Arena *allocator = Scratch_Get();
-    Int_Array digits = { .allocator = Scratch_Get() };
-
-    s64 total_jolts = 0;
+    s64 total_jolts       = 0;
     s64 total_super_jolts = 0;
+
+    Int_Array digits = { .allocator = Scratch_Get() };
 
     String_Array lines = string_split_by(input, "\n");
     for (u64 line_index = 0; line_index < lines.count; line_index++) {
