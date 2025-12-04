@@ -186,7 +186,7 @@ internal void print_time(u64 time_in_ns) {
 }
 
 
-void do_statistics(Int_Array times) {
+void do_statistics(u64_Array times) {
     u64 total_time_ns = 0;
     for (u64 i = 0; i < times.count; i++) {
         u64 time_ns = times.items[i];
@@ -196,8 +196,8 @@ void do_statistics(Int_Array times) {
 
     u64 sum_of_errors_ns = 0;
     for (u64 i = 0; i < times.count; i++) {
-        s64 time_ns = times.items[i];
-        sum_of_errors_ns += Abs((s64)average_time_ns - time_ns);
+        u64 time_ns = times.items[i];
+        sum_of_errors_ns += Abs((s64)average_time_ns - (s64)time_ns);
     }
     u64 average_error_ns = sum_of_errors_ns / times.count;
 
@@ -256,7 +256,7 @@ typedef struct {
         String _input = (input);                                            \
         Solution base_solution = solve_input(_input);                       \
                                                                             \
-        Int_Array times = ZEROED;                                           \
+        u64_Array times = ZEROED;                                           \
         for (s32 i = 0; i < (num_iterations); i++) {                        \
             start_timer();                                                  \
                 Solution solution = solve_input(_input);                    \
