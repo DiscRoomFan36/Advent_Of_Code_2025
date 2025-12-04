@@ -53,6 +53,7 @@ Make_Array(s8,  s8_Array);
 Make_Array(u8,  u8_Array);
 
 
+Make_Array(bool, bool_Array);
 
 
 
@@ -278,12 +279,15 @@ typedef struct {
 
 
 
-#define Array_Swap(array, i, j)                                 \
-    do {                                                        \
-        Typeof((array)->items[0]) tmp = (array)->items[(i)];    \
-        (array)->items[(i)] = (array)->items[(j)];              \
-        (array)->items[(j)] = tmp;                              \
+#define Swap(a, b)              \
+    do {                        \
+        Typeof(a) tmp = (a);    \
+        (a) = (b);              \
+        (b) = tmp;              \
     } while (0)
+
+
+#define Array_Swap(array, i, j) Swap((array)->items[(i)], (array)->items[(j)])
 
 
 #define Array_Reverse(array)                            \

@@ -4,8 +4,6 @@
 #include "common.h"
 
 
-Make_Array(bool, bool_Array);
-
 
 typedef struct {
     _Array_Header_;
@@ -20,13 +18,6 @@ typedef struct {
 #define grid_get(grid, i, j)  (grid)->items[grid_index((grid), (i), (j))]
 
 
-
-#define Swap(a, b)          \
-    do {                    \
-        Typeof(a) tmp = a;  \
-        a = b;              \
-        b = tmp;            \
-    } while (0)
 
 
 
