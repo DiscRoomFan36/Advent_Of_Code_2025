@@ -21,7 +21,7 @@ internal Solution solve_input(String input) {
         String line = lines.items[line_index];
 
         Input_Line input_line;
-        ASSERT(sscanf(line.data, "%c%d", &input_line.character, &input_line.number) == 2);
+        ASSERT(sscanf(line.data, "%c%ld", &input_line.character, &input_line.number) == 2);
         Array_Append(&inputs, input_line);
     }
 
