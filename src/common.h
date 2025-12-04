@@ -106,20 +106,54 @@ internal void start_timer(void) {
     timer_start = nanoseconds_since_unspecified_epoch();
 }
 
-internal void finish_timer(void) {
+// returns total time in nano_seconds
+internal u64 finish_timer(void) {
     u64 timer_end = nanoseconds_since_unspecified_epoch();
 
     u64 total_time_ns = timer_end - timer_start;
-
-    u64 ns = (total_time_ns           ) % 1000;
-    u64 us = (total_time_ns / THOUSAND) % 1000;
-    u64 ms = (total_time_ns / MILLION ) % 1000;
-    u64  s = (total_time_ns / BILLION ) % 1000;
-
-    printf("[[[[ ->    time: %4lds, %4ldms, %4ldus, %4ldns    <- ]]]]\n", s, ms, us, ns);
+    return total_time_ns;
 }
 
 
+typedef struct {
+    u64 ns;
+    u64 us;
+    u64 ms;
+    u64  s;
+
+    f64 in_seconds;
+} Time_In_Parts;
+
+internal Time_In_Parts time_in_ns_to_time_in_parts(u64 time_in_ns) {
+    Time_In_Parts result = {
+        .ns = (time_in_ns           ) % 1000,
+        .us = (time_in_ns / THOUSAND) % 1000,
+        .ms = (time_in_ns / MILLION ) % 1000,
+        . s = (time_in_ns / BILLION ) % 1000,
+
+        // this might result in the loss of some accuracy,
+        // but as long as the time is small it should be ok.
+        .in_seconds = (f64)time_in_ns / NANOSECONDS_PER_SECOND,
+    };
+    return result;
+}
+
+
+#define print_time_in_parts(time)   printf("%4lds, %4ldms, %4ldus, %4ldns", (time).s, (time).ms, (time).us, (time).ns)
+
+#define print_time_ns_in_parts(time_ns)                                 \
+    do {                                                                \
+        Time_In_Parts time = time_in_ns_to_time_in_parts(time_ns);      \
+        print_time_in_parts(time);                                      \
+    } while (0)
+
+
+internal void print_time(u64 time_in_ns) {
+    Time_In_Parts time = time_in_ns_to_time_in_parts(time_in_ns);
+    printf("[[[[ ->    time: ");
+    print_time_in_parts(time);
+    printf("    <- ]]]]\n");
+}
 
 
 
@@ -132,27 +166,33 @@ typedef struct {
 
 
 
-#define Do_Example(part_1_solution, part_2_solution)                                                        \
-    do {                                                                                                    \
-        start_timer();                                                                                      \
-            Solution example = solve_input(Get_Example());                                                  \
-        finish_timer();                                                                                     \
-                                                                                                            \
-        printf("    example:\n");                                                                           \
-        printf("        part 1: |%18ld|,   correct: |%18ld|\n", example.part_1, (s64)part_1_solution);     \
-        printf("        part 2: |%18ld|,   correct: |%18ld|\n", example.part_2, (s64)part_2_solution);     \
+#define Do_Example(part_1_solution, part_2_solution)                                                    \
+    do {                                                                                                \
+        String input_file = Get_Example();                                                              \
+        start_timer();                                                                                  \
+            Solution example = solve_input(input_file);                                                 \
+        u64 time = finish_timer();                                                                      \
+                                                                                                        \
+        printf("    example:\n");                                                                       \
+        printf("        part 1: |%18ld|,   correct: |%18ld|\n", example.part_1, (s64)part_1_solution);  \
+        printf("        part 2: |%18ld|,   correct: |%18ld|\n", example.part_2, (s64)part_2_solution);  \
+                                                                                                        \
+        print_time(time);                                                                               \
     } while (0)
 
 
 #define Do_Input()                                              \
     do {                                                        \
+        String input_file = Get_Input();                        \
         start_timer();                                          \
-            Solution input = solve_input(Get_Input());          \
-        finish_timer();                                         \
+            Solution input = solve_input(input_file);           \
+        u64 time = finish_timer();                              \
                                                                 \
         printf("    input  :\n");                               \
         printf("        part 1: |%18ld|\n", input.part_1);      \
         printf("        part 2: |%18ld|\n", input.part_2);      \
+                                                                \
+        print_time(time);                                       \
     } while (0)
 
 
