@@ -15,7 +15,7 @@ typedef struct {
 
 // the grid is actually 1 bigger, so i can iterate a square easily
 #define grid_index(grid, i, j)      ( (j+1) * ((grid)->width+1) + (i+1) )
-#define grid_get(grid, i, j)  (grid)->items[grid_index((grid), (i), (j))]
+#define grid_get(grid, i, j)        (grid)->items[grid_index((grid), (i), (j))]
 
 
 
