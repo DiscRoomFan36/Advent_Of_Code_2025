@@ -207,7 +207,7 @@ void do_statistics(Int_Array times) {
     printf("    Iterations    : %7ld runs\n", times.count);
     printf("    Total Time    :  "); print_time_ns_in_parts(total_time_ns);    printf("\n");
     printf("    Average Time  :  "); print_time_ns_in_parts(average_time_ns);  printf("\n");
-    printf("    Average Error : ±"); print_time_ns_in_parts(average_error_ns); printf("\n");
+    printf("    Std. Error    : ±"); print_time_ns_in_parts(average_error_ns); printf("\n");
     printf("    Variance (%%)  : ±%5.2f%%\n", variance * 100);
 }
 
