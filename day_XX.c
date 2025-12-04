@@ -49,6 +49,8 @@ int main(void) {
 
     // Do_Input();
 
+    // Perf_Input(Get_Input(), 10);
+
     printf("======================================================================================\n");
     Scratch_Free();
     return 0;

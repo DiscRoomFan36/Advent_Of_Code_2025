@@ -25,6 +25,36 @@ global_variable Arena_Pool *pool = &_pool;
 #define Scratch_Free()          Pool_Free_Arenas(pool)
 
 
+////////////////////////////////////////////
+//           Array Helpers
+////////////////////////////////////////////
+
+#define Make_Array(type, name)      \
+    typedef struct {                \
+        _Array_Header_;             \
+        type *items;                \
+    } name
+
+// Common Arrays
+Make_Array(s64, Int_Array);
+Make_Array(String, String_Array);
+
+// Other Ints
+typedef Int_Array s64_Array;
+Make_Array(u64, u64_Array);
+
+Make_Array(s32, s32_Array);
+Make_Array(u32, u32_Array);
+
+Make_Array(s16, s16_Array);
+Make_Array(u16, u16_Array);
+
+Make_Array(s8,  s8_Array);
+Make_Array(u8,  u8_Array);
+
+
+
+
 
 
 #define MAX_TEMP_FILE_SIZE      (1 * MEGABYTE)
@@ -156,8 +186,32 @@ internal void print_time(u64 time_in_ns) {
 }
 
 
+void do_statistics(Int_Array times) {
+    u64 total_time_ns = 0;
+    for (u64 i = 0; i < times.count; i++) {
+        u64 time_ns = times.items[i];
+        total_time_ns += time_ns;
+    }
+    u64 average_time_ns = total_time_ns / times.count;
 
-#define Proper_Mod(x, y) ((((x) % (y)) + (y)) % (y))
+    u64 sum_of_errors_ns = 0;
+    for (u64 i = 0; i < times.count; i++) {
+        s64 time_ns = times.items[i];
+        sum_of_errors_ns += Abs((s64)average_time_ns - time_ns);
+    }
+    u64 average_error_ns = sum_of_errors_ns / times.count;
+
+    f64 variance = (f64)average_error_ns / (f64)average_time_ns;
+
+    printf("Statistics:\n");
+    printf("    Iterations    : %7ld runs\n", times.count);
+    printf("    Total Time    :  "); print_time_ns_in_parts(total_time_ns);    printf("\n");
+    printf("    Average Time  :  "); print_time_ns_in_parts(average_time_ns);  printf("\n");
+    printf("    Average Error : ±"); print_time_ns_in_parts(average_error_ns); printf("\n");
+    printf("    Variance (%%)  : ±%5.2f%%\n", variance * 100);
+}
+
+
 
 typedef struct {
     s64 part_1;
@@ -197,24 +251,31 @@ typedef struct {
 
 
 
+#define Perf_Input(input, num_iterations)                                   \
+    do {                                                                    \
+        String _input = (input);                                            \
+        Solution base_solution = solve_input(_input);                       \
+                                                                            \
+        Int_Array times = ZEROED;                                           \
+        for (s32 i = 0; i < (num_iterations); i++) {                        \
+            start_timer();                                                  \
+                Solution solution = solve_input(_input);                    \
+            u64 time = finish_timer();                                      \
+            ASSERT(Mem_Eq(&base_solution, &solution, sizeof(solution)));    \
+            Array_Append(&times, time);                                     \
+        }                                                                   \
+                                                                            \
+        do_statistics(times);                                               \
+    } while (0)
+
 
 
 ///////////////////////////////////////////////////
-//                     Helpers
+//                Other Helpers
 ///////////////////////////////////////////////////
 
+#define Proper_Mod(x, y) ((((x) % (y)) + (y)) % (y))
 
-
-#define Make_Array(type, name)      \
-    typedef struct {                \
-        _Array_Header_;             \
-        type *items;                \
-    } name
-
-
-
-Make_Array(s64, Int_Array);
-Make_Array(String, String_Array);
 
 
 #define Array_Swap(array, i, j)                                 \
