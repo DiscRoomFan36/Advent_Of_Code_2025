@@ -37,7 +37,7 @@ internal Solution solve_input(String input) {
 
 
     // sort ranges on start, and then merge them.
-    qsort(ranges.items, ranges.count, sizeof(ranges.items[0]), compare_ranges_on_start);
+    sort_ranges_on_start(&ranges);
 
     for (u64 i = 0; i < ranges.count-1; i++) {
         Range a = ranges.items[i];
