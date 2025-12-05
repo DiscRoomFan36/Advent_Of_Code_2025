@@ -132,18 +132,30 @@ internal String file_name_to_example_or_input(String filename, bool get_example)
 
 
 
-global_variable u64 timer_start = 0;
+
+global_variable u64 timer_start_stack[64];
+global_variable u32 timer_start_stack_count = 0;
+
 internal void start_timer(void) {
-    timer_start = nanoseconds_since_unspecified_epoch();
+    if (timer_start_stack_count < Array_Len(timer_start_stack)) {
+        timer_start_stack[timer_start_stack_count] = nanoseconds_since_unspecified_epoch();
+    }
+    timer_start_stack_count += 1;
 }
 
 // returns total time in nano_seconds
-internal u64 finish_timer(void) {
+internal s64 finish_timer(void) {
     u64 timer_end = nanoseconds_since_unspecified_epoch();
 
-    u64 total_time_ns = timer_end - timer_start;
-    return total_time_ns;
+    timer_start_stack_count -= 1;
+    if (timer_start_stack_count < Array_Len(timer_start_stack)) {
+        u64 total_time = timer_end - timer_start_stack[timer_start_stack_count];
+        return total_time;
+    } else {
+        return -1;
+    }
 }
+
 
 
 typedef struct {
