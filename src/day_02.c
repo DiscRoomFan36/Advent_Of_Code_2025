@@ -6,13 +6,6 @@
 
 
 
-
-typedef struct {
-    u64 start, end;
-} Range;
-Make_Array(Range, Range_Array);
-
-
 internal bool number_is_invalid_id_group_2(u64 n) {
     u32 log_10 = int_log_10(n);
     u64 pow_10 = int_pow(10, log_10/2);
@@ -35,7 +28,7 @@ internal Solution solve_input(String input) {
         Array_Append(&ranges, range);
     }
 
-    u64 max_end = 0;
+    s64 max_end = 0;
     for (u32 i = 0; i < ranges.count; i++) {
         if (max_end < ranges.items[i].end) max_end = ranges.items[i].end;
     }
@@ -60,7 +53,7 @@ internal Solution solve_input(String input) {
                 mask = mask * mask_mul + 1;
 
                 for (u64 i = i_start; i <= i_end; i++) {
-                    u64 y = i * mask;
+                    s64 y = i * mask;
                     if (y > max_end) break;
                     Array_Append(&all_invalid_ids, y);
                 }
@@ -80,11 +73,11 @@ internal Solution solve_input(String input) {
         u64 index = binary_search(all_invalid_ids, range.start);
 
         for (u64 k = index; k < all_invalid_ids.count; k++) {
-            u64 id = all_invalid_ids.items[k];
+            s64 id = all_invalid_ids.items[k];
             if (id > range.end) break;
 
             // handle duplicates
-            if ((k < all_invalid_ids.count-1) && (id == (u64)all_invalid_ids.items[k+1])) continue;
+            if ((k < all_invalid_ids.count-1) && (id == all_invalid_ids.items[k+1])) continue;
 
 
             if (number_is_invalid_id_group_2(id)) invalid_id_sum += id;

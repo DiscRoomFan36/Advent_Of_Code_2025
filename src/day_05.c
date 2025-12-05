@@ -4,45 +4,6 @@
 #include "common.h"
 
 
-typedef struct {
-    u64 start, end;
-} Range;
-Make_Array(Range, Range_Array);
-
-
-
-internal int compare_ranges_on_start(const void *_a, const void *_b) {
-    Range a = *(Range*)_a;
-    Range b = *(Range*)_b;
-    if      (a.start < b.start)  return -1;
-    else if (a.start > b.start)  return  1;
-    else                         return  0;
-}
-
-void print_range(Range range) {
-    printf("%ld-%ld", range.start, range.end);
-}
-
-void print_range_array(Range_Array ranges) {
-    printf("{\n");
-    for (u64 i = 0; i < ranges.count; i++) {
-        printf("    ");
-        print_range(ranges.items[i]);
-        printf(",\n");
-    }
-    printf("}\n");
-}
-
-
-
-
-
-typedef struct {
-    char character;
-    s64 number;
-} Input_Line;
-Make_Array(Input_Line, Input_Line_Array);
-
 
 internal Solution solve_input(String input) {
 
@@ -98,7 +59,7 @@ internal Solution solve_input(String input) {
     // part 1
     s64 fresh_ingredients = 0;
     for (u64 i = 0; i < ingredients.count; i++) {
-        u64 id = ingredients.items[i];
+        s64 id = ingredients.items[i];
 
         // binary_search
         s64 low = 0;

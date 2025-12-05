@@ -435,6 +435,44 @@ u64 binary_search(Int_Array array, s64 x) {
 
 
 
+typedef struct {
+    s64 start, end;
+} Range;
+Make_Array(Range, Range_Array);
+
+
+
+internal int compare_ranges_on_start(const void *_a, const void *_b) {
+    Range a = *(Range*)_a;
+    Range b = *(Range*)_b;
+    if      (a.start < b.start) return -1;
+    else if (a.start > b.start) return  1;
+    else                        return  0;
+}
+
+internal int compare_ranges_on_end(const void *_a, const void *_b) {
+    Range a = *(Range*)_a;
+    Range b = *(Range*)_b;
+    if      (a.end < b.end)     return -1;
+    else if (a.end > b.end)     return  1;
+    else                        return  0;
+}
+
+
+void sort_ranges_on_start(Range_Array *ranges) {
+    qsort(ranges->items, ranges->count, sizeof(ranges->items[0]), compare_ranges_on_start);
+}
+
+void sort_ranges_on_end(Range_Array *ranges) {
+    qsort(ranges->items, ranges->count, sizeof(ranges->items[0]), compare_ranges_on_end);
+}
+
+
+
+
+
+
+
 u32 int_log_10(u64 x) {
     u32 result = 0;
     while (x > 0) { result += 1; x /= 10; }
@@ -521,6 +559,8 @@ void print_f64   (void *_x) { f64 x    = *(f64*)   _x; printf("%f",  x); }
 
 void print_string(void *_x) { String x = *(String*)_x; printf("\""S_Fmt"\"", S_Arg(x)); }
 
+void print_range(void *_range) { Range range = *(Range*)_range; printf("%ld-%ld", range.start, range.end); }
+
 
 void print_int_array(void *_array) {
     Int_Array array = *(Int_Array*)_array;
@@ -543,6 +583,20 @@ void print_string_array(void *_array) {
     printf("}");
 }
 
+void print_range_array(void *_ranges) {
+    Range_Array ranges = *(Range_Array*)_ranges;
+    printf("{\n");
+    for (u64 i = 0; i < ranges.count; i++) {
+        printf("    ");
+        print_range(&ranges.items[i]);
+        printf(",\n");
+    }
+    printf("}\n");
+}
+
+
+
+
 
 #define generic_print(x)                                    \
     _Generic(x,                                             \
@@ -552,8 +606,10 @@ void print_string_array(void *_array) {
         s8 : print_s8 (&x),  u8 : print_u8 (&x),            \
         f32: print_f32(&x),  f64: print_f64(&x),            \
         String: print_string(&x),                           \
+        Range: print_range(&x),                             \
         Int_Array: print_int_array(&x),                     \
         String_Array: print_string_array(&x),               \
+        Range_Array: print_range_array(&x),                 \
         default: printf("?UNKNOWN_TYPE?")                   \
     )
 
