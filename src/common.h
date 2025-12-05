@@ -133,7 +133,7 @@ internal String file_name_to_example_or_input(String filename, bool get_example)
 
 
 
-global_variable u64 timer_start_stack[64];
+global_variable u64 timer_start_stack[1 << 12];
 global_variable u32 timer_start_stack_count = 0;
 
 internal void start_timer(void) {
