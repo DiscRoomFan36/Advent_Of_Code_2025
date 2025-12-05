@@ -106,8 +106,12 @@ int main(int argc, char **argv) {
         // cmd_append(&cmd, "-Werror");
         cmd_append(&cmd, "-I"THIRDPARTY_FOLDER);
 
+        // why not?
+        cmd_append(&cmd, "-march=native");
+
         if (turn_on_optimizer) cmd_append(&cmd, "-O2");
         else                   cmd_append(&cmd, "-ggdb");
+
 
         cmd_append(&cmd, "-o",  temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(day)));
         cmd_append(&cmd, temp_sprintf("%s"SV_Fmt".c", SRC_FOLDER, SV_Arg(day)));
@@ -118,6 +122,24 @@ int main(int argc, char **argv) {
 
 
     #define DEBUGGER_PATH "/home/fletcher/Thirdpary/gf/gf2"
+
+
+
+// #define ONLY_RUN_THIS_DAY "day_02"
+
+#ifdef ONLY_RUN_THIS_DAY
+
+    if (run_last_day | run_all) {
+        String_View day = sv_from_cstr(ONLY_RUN_THIS_DAY);
+
+        if (debug) cmd_append(&cmd, DEBUGGER_PATH);
+        cmd_append(&cmd, temp_sprintf("%s"SV_Fmt, BUILD_FOLDER, SV_Arg(day)));
+
+        if (!cmd_run(&cmd)) return 1;
+    }
+
+#else
+
 
     if (run_last_day) {
         String_View last_day = days.items[days.count-1];
@@ -138,6 +160,8 @@ int main(int argc, char **argv) {
             if (!cmd_run(&cmd)) return 1;
         }
     }
+
+#endif
 
     return 0;
 }

@@ -398,6 +398,17 @@ void sort_int_array(Int_Array *array) {
     qsort(array->items, array->count, sizeof(array->items[0]), compare_ints);
 }
 
+bool int_array_is_sorted_small_to_big(Int_Array array) {
+    for (u64 i = 0; i < array.count-1; i++) {
+        s64 n = array.items[i];
+        s64 m = array.items[i+1];
+        if (!(n <= m)) return false;
+    }
+    return true;
+}
+
+
+
 void debug_print_around(Int_Array array, s64 low, s64 high) {
     low = Max(low, 0);
     high = Min(high, (s64)array.count-1);
@@ -557,6 +568,8 @@ void print_f32   (void *_x) { f32 x    = *(f32*)   _x; printf("%f",  x); }
 void print_f64   (void *_x) { f64 x    = *(f64*)   _x; printf("%f",  x); }
 
 
+void print_bool  (void *_x) { bool x   = *(bool*)  _x; printf("%s", x ? "true" : "false"); }
+
 void print_string(void *_x) { String x = *(String*)_x; printf("\""S_Fmt"\"", S_Arg(x)); }
 
 void print_range(void *_range) { Range range = *(Range*)_range; printf("%ld-%ld", range.start, range.end); }
@@ -605,6 +618,7 @@ void print_range_array(void *_ranges) {
         s16: print_s16(&x),  u16: print_u16(&x),            \
         s8 : print_s8 (&x),  u8 : print_u8 (&x),            \
         f32: print_f32(&x),  f64: print_f64(&x),            \
+        bool: print_bool(&x),                               \
         String: print_string(&x),                           \
         Range: print_range(&x),                             \
         Int_Array: print_int_array(&x),                     \
@@ -614,7 +628,7 @@ void print_range_array(void *_ranges) {
     )
 
 
-#define debug(x)  do { printf("DEBUG: %s = ", #x); generic_print(x); printf("\n"); } while (0)
+#define debug(x)  do { Typeof(x) _x = (x); printf("DEBUG: %s = ", #x); generic_print(_x); printf("\n"); } while (0)
 
 
 #define debug_break() asm("int3")

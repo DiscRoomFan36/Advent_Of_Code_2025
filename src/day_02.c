@@ -6,12 +6,14 @@
 
 
 
+
 internal bool number_is_invalid_id_group_2(u64 n) {
+    // we dont explicently check that 'log_10 % 2 == 0'
+    // but the return statement will always fail if that is the case
     u32 log_10 = int_log_10(n);
     u64 pow_10 = int_pow(10, log_10/2);
     return (n % pow_10) == (n / pow_10);
 }
-
 
 
 internal Solution solve_input(String input) {
@@ -35,8 +37,14 @@ internal Solution solve_input(String input) {
     u32 max_log_10 = int_log_10(max_end);
 
 
+    // Get all possible invalid id's, (that are smaller than max_end)
     Int_Array all_invalid_ids = { .allocator = Scratch_Get() };
+
     {
+        Arena *allocator = Scratch_Get();
+        Int_Array array_array[32] = ZEROED;
+        u32 array_array_count = 0;
+
         u64 j_start  = 0;
         u64 mask_mul = 1;
         u64 i_end    = 0;
@@ -48,20 +56,86 @@ internal Solution solve_input(String input) {
             u64 i_start = int_pow(10, k);
             i_end       = i_end * 10 + 9;
 
+            Int_Array array = { .allocator = allocator };
+            // reserve all you need. might be more than you need
+            Array_Reserve(&array, (max_log_10 - j_start) * (i_end - i_start + 1));
+
             u64 mask = 1;
             for (u64 j = j_start; j <= max_log_10; j += j_start) {
                 mask = mask * mask_mul + 1;
 
                 for (u64 i = i_start; i <= i_end; i++) {
                     s64 y = i * mask;
-                    if (y > max_end) break;
-                    Array_Append(&all_invalid_ids, y);
+                    if (max_end < y) break;
+                    array.items[array.count++] = y;
                 }
             }
+
+            array_array[array_array_count++] = array;
+            ASSERT(array_array_count <= Array_Len(array_array));
         }
 
+        // array_array is an array of arrays,
+        //
+        // all the arrays are sorted locally, now we just need to merge them.
+        //
+        // min heap might be slower than just checking every one every single time.
+        // theres only like 5 of them
+
+        u64 total_elements = 0;
+        for (u64 i = 0; i < array_array_count; i++) total_elements += array_array[i].count;
+
+        // put them into the final array,
+        Array_Reserve(&all_invalid_ids, total_elements);
+        all_invalid_ids.count = total_elements;
+
+        struct Stack_Item {
+            s64 number;
+            u32 array_index;
+            u32 element_index;
+        } stack[Array_Len(array_array)] = ZEROED;
+        u32 stack_count = array_array_count;
+        for (u64 i = 0; i < stack_count; i++) {
+            struct Stack_Item item = {
+                .number        = array_array[i].items[0],
+                .array_index   = i,
+                .element_index = 0,
+            };
+            stack[i] = item;
+        }
+
+
+
+        u64 invalid_ids_index = 0;
+        while (stack_count > 0) {
+            // find smallest element TODO min heap.
+            struct Stack_Item *smallest = &stack[0];
+            for (u32 i = 1; i < stack_count; i++) {
+                if (stack[i].number < smallest->number) {
+                    smallest = &stack[i];
+                }
+            }
+
+            all_invalid_ids.items[invalid_ids_index++] = smallest->number;
+            smallest->element_index += 1;
+
+
+            Int_Array *a = &array_array[smallest->array_index];
+
+            // remove if the array is out of elements
+            if (smallest->element_index >= a->count) {
+                // stamp and remove.
+                if (smallest != &stack[stack_count-1]) {
+                    *smallest = stack[stack_count-1];
+                }
+                stack_count -= 1;
+            } else {
+                smallest->number = a->items[smallest->element_index];
+            }
+
+        }
     }
-    sort_int_array(&all_invalid_ids);
+
 
 
     s64 invalid_id_sum = 0;
@@ -103,6 +177,8 @@ int main(void) {
     Do_Example(1227775554, 4174379265);
 
     Do_Input();
+
+    // Perf_Input(Get_Input(), 1000);
 
     printf("======================================================================================\n");
     Scratch_Free();
