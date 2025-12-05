@@ -13,7 +13,9 @@ Make_Array(Input_Line, Input_Line_Array);
 
 internal Solution solve_input(String input) {
 
-    Input_Line_Array inputs = { .allocator = Scratch_Get() };
+    Arena *allocator = Scratch_Get();
+
+    Input_Line_Array inputs = { .allocator = allocator, };
 
 
     String_Array lines = string_split_by(input, "\n");
