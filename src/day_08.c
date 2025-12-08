@@ -34,12 +34,16 @@ internal inline s64 dist_sqr(Vector3 a, Vector3 b) {
 }
 
 
+typedef u16 Index_Type;
+
 typedef struct {
-    u32 index_a;
-    u32 index_b;
-    s64 dist_sqr;
+    Index_Type index_a;
+    Index_Type index_b;
+    f32 dist_sqr; // f32 is smaller than s64, now this entire struct fits in a 64-bit number
 } Index_And_Dist_Pair;
 Make_Array(Index_And_Dist_Pair, Distance_Pairs_Array);
+
+
 
 internal int compare_dists_and_pairs(const void *_a, const void *_b) {
     Index_And_Dist_Pair *a = (Index_And_Dist_Pair*)_a;
@@ -49,11 +53,9 @@ internal int compare_dists_and_pairs(const void *_a, const void *_b) {
     else                                    return  0;
 }
 
-
-
-internal int compare_u32s(const void *_a, const void *_b) {
-    u32 a = *(u32*)_a;
-    u32 b = *(u32*)_b;
+internal int compare_Index_Types(const void *_a, const void *_b) {
+    Index_Type a = *(Index_Type*)_a;
+    Index_Type b = *(Index_Type*)_b;
     if      (a > b)  return -1;
     else if (a < b)  return  1;
     else             return  0;
@@ -77,25 +79,40 @@ internal Solution solve_input(String input) {
     // print_Vector3_Array(junction_boxs);
     u32 num_connections_to_make = junction_boxs.count == 20 ? 10 : 1000;
 
+    // index type should be able to index every junction box.
+    ASSERT( junction_boxs.count < (1UL << (sizeof(Index_Type)*8-1)) );
 
-    // takes about 6ms on input
+
     Distance_Pairs_Array dists_and_pairs = { .allocator = allocator };
-    for (u64 i = 0; i < junction_boxs.count-1; i++) {
-        Vector3 a = junction_boxs.items[i];
-        for (u64 j = i+1; j < junction_boxs.count; j++) {
-            Vector3 b = junction_boxs.items[j];
 
-            s64 dist = dist_sqr(a, b);
+    {
+        u32 number_of_pairs = (junction_boxs.count * (junction_boxs.count-1)) / 2;
+        Array_Add(&dists_and_pairs, number_of_pairs);
+        u32 pairs_count = 0;
 
-            Index_And_Dist_Pair pair = {
-                .index_a = i,
-                .index_b = j,
-                .dist_sqr = dist,
-            };
+        for (u64 i = 0; i < junction_boxs.count-1; i++) {
+            Vector3 a = junction_boxs.items[i];
+            for (u64 j = i+1; j < junction_boxs.count; j++) {
+                Vector3 b = junction_boxs.items[j];
 
-            Array_Append(&dists_and_pairs, pair);
+                s64 dist = dist_sqr(a, b);
+                f32 dist_f32 = dist;
+
+                Index_And_Dist_Pair pair = {
+                    .index_a = i,
+                    .index_b = j,
+                    // .dist_sqr = dist,
+                    .dist_sqr = dist_f32,
+                };
+
+                // Array_Append(&dists_and_pairs, pair);
+                dists_and_pairs.items[pairs_count++] = pair;
+            }
         }
+
+        ASSERT(pairs_count == number_of_pairs);
     }
+
 
     // debug(junction_boxs.count);
     // debug(dists_and_pairs.count);
@@ -104,13 +121,13 @@ internal Solution solve_input(String input) {
     qsort(dists_and_pairs.items, dists_and_pairs.count, sizeof(dists_and_pairs.items[0]), compare_dists_and_pairs);
 
 
-    u32 group_array [junction_boxs.count];
-    u32 group_counts[junction_boxs.count];
+    Index_Type group_array [junction_boxs.count];
+    Index_Type group_counts[junction_boxs.count];
 
     Mem_Zero(group_array,  sizeof(group_array));
     Mem_Zero(group_counts, sizeof(group_counts));
 
-    u32 num_groups = 0;
+    Index_Type num_groups = 0;
 
     s64 part_1 = 0;
     s64 part_2 = 0;
@@ -118,16 +135,16 @@ internal Solution solve_input(String input) {
     for (u64 i = 0; i < dists_and_pairs.count; i++) {
         if (i == num_connections_to_make) {
 
-            u32 groups_count_copy[num_groups+1];
+            Index_Type groups_count_copy[num_groups+1];
             Mem_Copy(groups_count_copy, group_counts, (num_groups+1)*sizeof(group_counts[0]));
 
             // grap the top 3 counts
-            qsort(groups_count_copy, num_groups+1, sizeof(groups_count_copy[0]), compare_u32s);
+            qsort(groups_count_copy, num_groups+1, sizeof(groups_count_copy[0]), compare_Index_Types);
 
 
             u64 total = 1;
             for (u32 i = 0; i < 3; i++) {
-                u32 count = groups_count_copy[i];
+                Index_Type count = groups_count_copy[i];
                 // ASSERT(count != 0);
                 total *= count;
             }
@@ -137,8 +154,8 @@ internal Solution solve_input(String input) {
 
         Index_And_Dist_Pair pair = dists_and_pairs.items[i];
 
-        u32 index_a_group = group_array[pair.index_a];
-        u32 index_b_group = group_array[pair.index_b];
+        Index_Type index_a_group = group_array[pair.index_a];
+        Index_Type index_b_group = group_array[pair.index_b];
 
         if (index_a_group == 0 && index_b_group == 0) {
             // neither of them are in a group
@@ -162,8 +179,8 @@ internal Solution solve_input(String input) {
             if (index_a_group == index_b_group) continue;
 
             // maybe choose the smaller one?
-            u32 to_find = index_b_group;
-            u32 to_replace_with = index_a_group;
+            Index_Type to_find         = index_b_group;
+            Index_Type to_replace_with = index_a_group;
             for (u64 j = 0; j < junction_boxs.count; j++) {
                 if (group_array[j] == to_find) {
                     group_array[j] = to_replace_with;
@@ -206,7 +223,7 @@ int main(void) {
 
     Do_Input();
 
-    // Perf_Input(Get_Input(), 100);
+    Perf_Input(Get_Input(), 10);
 
     printf("======================================================================================\n");
     Scratch_Free();

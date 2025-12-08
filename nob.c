@@ -125,7 +125,7 @@ int main(int argc, char **argv) {
 
 
 
-// #define ONLY_RUN_THIS_DAY "day_02"
+#define ONLY_RUN_THIS_DAY "day_08"
 
 #ifdef ONLY_RUN_THIS_DAY
 
