@@ -10,7 +10,7 @@
 internal bool number_is_invalid_id_group_2(u64 n) {
     // we dont explicently check that 'log_10 % 2 == 0'
     // but the return statement will always fail if that is the case
-    u32 log_10 = int_log_10(n);
+    u32 log_10 = int_log_10(n)+1;
     u64 pow_10 = int_pow(10, log_10/2);
     return (n % pow_10) == (n / pow_10);
 }
@@ -34,7 +34,7 @@ internal Solution solve_input(String input) {
     for (u32 i = 0; i < ranges.count; i++) {
         if (max_end < ranges.items[i].end) max_end = ranges.items[i].end;
     }
-    u32 max_log_10 = int_log_10(max_end);
+    u32 max_log_10 = int_log_10(max_end)+1;
 
 
     // Get all possible invalid id's, (that are smaller than max_end)

@@ -495,27 +495,35 @@ void sort_ranges_on_end(Range_Array *ranges) {
 
 
 
+// static_assert(int_log_n(int_pow(n, x), n) == x);
+
+// all int log's round down.
 
 u32 int_log_10(u64 x) {
+    if (x == 0) return 0;
     u32 result = 0;
     while (x > 0) { result += 1; x /= 10; }
-    return result;
+    return result - 1;
 }
 
 u32 int_log_2(u64 x) {
+    if (x == 0) return 0;
     u32 result = 0;
     while (x > 0) { result += 1; x /=  2; }
-    return result;
+    return result - 1;
 }
 
 u32 int_log_n(u64 x, u64 n) {
+    if (x == 0) return 0;
+
     // these are much faster because constant division is faster.
     if (n == 2)  return int_log_2 (x);
     if (n == 10) return int_log_10(x);
 
+    ASSERT(n != 0);
     u32 result = 0;
     while (x > 0) { result += 1; x /=  n; }
-    return result;
+    return result-1;
 }
 
 
