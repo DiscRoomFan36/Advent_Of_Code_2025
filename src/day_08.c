@@ -63,7 +63,7 @@ internal int compare_Index_Types(const void *_a, const void *_b) {
 
 
 
-internal Solution solve_input(String input) {
+internal Solution solve_input_1(String input) {
     Arena *allocator = Scratch_Get();
     Vector3_Array junction_boxs = { .allocator = allocator };
 
@@ -213,6 +213,119 @@ internal Solution solve_input(String input) {
 }
 
 
+
+
+
+#define DIM_SIZE        32
+
+typedef struct {
+    Vector3 vec;
+    Index_Type id; // index into junction_boxs array.
+} Vector_And_Id;
+
+typedef struct {
+    Vector_And_Id items[8];
+    u32 count;
+} Vector3_Box;
+
+// a 3d array that holds the junction boxs
+global_variable Vector3_Box spacial_array[DIM_SIZE*DIM_SIZE*DIM_SIZE];
+
+global_variable u32         spacial_array_step_size;
+
+
+internal Vector3_Box *ijk_to_box(u32 i, u32 j, u32 k) {
+    return &spacial_array[k*DIM_SIZE*DIM_SIZE + j*DIM_SIZE + i];
+}
+
+
+internal Vector3_Box *Vector3_to_box(Vector3 vec) {
+    // NOTE spacial_array_step_size wiil allways be a power of 2
+    // NOTE z array could be used here.
+    u32 i = vec.x / spacial_array_step_size;
+    u32 j = vec.y / spacial_array_step_size;
+    u32 k = vec.z / spacial_array_step_size;
+    return ijk_to_box(i, j, k);
+}
+
+internal Solution solve_input_2(String input) {
+    Arena *allocator = Scratch_Get();
+    Vector3_Array junction_boxs = { .allocator = allocator };
+
+    String_Array lines = string_split_by(input, "\n");
+
+    s32 max_dim = 0;
+
+    for (u64 line_index = 0; line_index < lines.count; line_index++) {
+        String line = lines.items[line_index];
+
+        Vector3 box;
+        ASSERT(sscanf(line.data, "%d,%d,%d", &box.x, &box.y, &box.z) == 3);
+
+        if (max_dim < box.x) max_dim = box.x;
+        if (max_dim < box.y) max_dim = box.y;
+        if (max_dim < box.z) max_dim = box.z;
+
+        Array_Append(&junction_boxs, box);
+    }
+
+    // u32 num_connections_to_make_for_part_1 = junction_boxs.count == 20 ? 10 : 1000;
+
+    // index type should be able to index every junction box.
+    ASSERT( junction_boxs.count < (1UL << (sizeof(Index_Type)*8-1)) );
+
+
+    debug(max_dim);
+
+    // plus 1 to go past.
+    u32 max_log_2 = int_log_2(max_dim)+1;
+    u32 new_max_dim = int_pow(2, max_log_2);
+    debug(max_log_2);
+    debug(new_max_dim);
+
+
+    Mem_Zero(spacial_array, sizeof(spacial_array));
+    spacial_array_step_size = new_max_dim / DIM_SIZE;
+
+    for (u32 i = 0; i < junction_boxs.count; i++) {
+        Vector3 vec = junction_boxs.items[i];
+
+        Vector_And_Id v_a_i = {vec, i};
+
+        Vector3_Box *box = Vector3_to_box(vec);
+        ASSERT(box->count < Array_Len(box->items));
+        box->items[box->count++] = v_a_i;
+    }
+
+
+
+
+
+    Solution solution = {
+        .part_1 = 0,
+        .part_2 = 0,
+    };
+    return solution;
+}
+
+
+
+
+
+
+
+internal Solution solve_input(String input) {
+    Solution sol_1 = solve_input_1(input);
+    Solution sol_2 = solve_input_2(input);
+
+    printf("part_1 %s, (%12ld, %12ld)\n", sol_1.part_1 == sol_2.part_1 ? " True" : "False", sol_1.part_1, sol_2.part_1);
+    printf("part_2 %s, (%12ld, %12ld)\n", sol_1.part_2 == sol_2.part_2 ? " True" : "False", sol_1.part_2, sol_2.part_2);
+
+    return sol_1;
+}
+
+
+
 #define DAY "08"
 
 int main(void) {
@@ -223,7 +336,7 @@ int main(void) {
 
     Do_Input();
 
-    Perf_Input(Get_Input(), 10);
+    // Perf_Input(Get_Input(), 10);
 
     printf("======================================================================================\n");
     Scratch_Free();
