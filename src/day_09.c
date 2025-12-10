@@ -1,6 +1,9 @@
 
 #include <stdio.h>
 
+#include <errno.h>
+#include <pthread.h>
+
 #include "common.h"
 
 
@@ -68,59 +71,69 @@ internal bool rectangle_fully_enclosed(Vector2_Array positions, Vector2 p1, Vect
         }
     }
 
-#if 0
-
+    // check if any line intersects with the rectangle
     for (u32 i = 0; i < positions.count; i++) {
         Line line = get_line(positions, i);
 
-        // if (line.start.x != line.end.x)
+        // check if the rectanlge is intersecting.
+        // bool intersect = !(line.end.y <= min_y || line.start.y >= max_y) && !(line.end.x <= min_x || line.start.x >= max_x);
+        bool intersect = (line.end.x > min_x && line.start.x < max_x) &&
+                         (line.end.y > min_y && line.start.y < max_y);
 
-        // +1 & -1 to make the rectangle checking the slightly smaller one.
-        bool rectanlges_intersect = (
-            max_x-1 >= line.start.x &&      // r1 right edge past r2 left
-            min_x+1 <= line.end.x   &&      // r1 left edge past r2 right
-            max_y-1 >= line.start.y &&      // r1 top edge past r2 bottom
-            min_y+1 <= line.end.x           // r1 bottom edge past r2 top
-        );
-
-        if (rectanlges_intersect) return false;
+        if (intersect) return false;
     }
-
-#else
-
-    for (u32 i = 0; i < positions.count; i++) {
-        Line line = get_line(positions, i);
-
-        // check if the mid point of the line is in the middle.
-        //
-        // this check is not exhaustive, as a malicious input could have
-        // a mid point outside of the rectangle but still intersect.
-        s32 mid_x = (line.start.x + line.end.x) / 2;
-        s32 mid_y = (line.start.y + line.end.y) / 2;
-        if (point_inside_rectangle(min_x, max_x, min_y, max_y, mid_x, mid_y)) {
-            return false;
-        }
-    }
-
-
-    // for (u32 i = 0; i < positions.count; i++) {
-    //     Line line = get_line(positions, i);
-
-    //     // check if some mid point is within the line. this check is also not exaustive.
-    //     // but much more likely to stop some malicious input.
-    //     for (u32 j = 1; j < 8; j++) {
-    //         s32 mid_x = ((line.end.x - line.start.x) * j) / 8 + line.start.x;
-    //         s32 mid_y = ((line.end.y - line.start.y) * j) / 8 + line.start.y;
-    //         if (point_inside_rectangle(min_x, max_x, min_y, max_y, mid_x, mid_y)) {
-    //             return false;
-    //         }
-    //     }
-
-    // }
-#endif
 
     return true;
 }
+
+
+
+
+#define USE_MULTITHREADING      true
+
+#if USE_MULTITHREADING
+
+internal u64 largest_rectangle_that_fits_with_starting_position(Vector2_Array positions, u32 i) {
+    u64 max_rectanlge_that_fits = 0;
+
+    Vector2 p1 = positions.items[i];
+
+    for (u64 j = i+2; j < positions.count; j++) {
+        Vector2 p2 = positions.items[j];
+
+        u64 rec_size = get_rec_size(p1, p2);
+        if (max_rectanlge_that_fits < rec_size) {
+            if (rectangle_fully_enclosed(positions, p1, p2)) {
+                max_rectanlge_that_fits = rec_size;
+            }
+        }
+    }
+
+    return max_rectanlge_that_fits;
+}
+
+
+Vector2_Array global_positions = ZEROED;
+Atomic(u32)   atomic_counter = 0;
+u64 result_array_for_threads[512];
+
+internal void *thread_grab_from_stack_until_done(void *arg) {
+    (void) arg;
+
+    ASSERT(global_positions.count <= Array_Len(result_array_for_threads));
+
+    while (true) {
+        u32 i = Atomic_Add(&atomic_counter, 1);
+        if (i >= global_positions.count) break;
+
+        u64 result = largest_rectangle_that_fits_with_starting_position(global_positions, i);
+        result_array_for_threads[i] = result;
+    }
+
+    return NULL;
+}
+
+#endif // USE_MULTITHREADING
 
 
 
@@ -141,7 +154,7 @@ internal Solution solve_input(String input) {
     // part 1
     u64 max_rectangle_size = 0;
 
-    for (u64 i = 0; i < positions.count-1; i++) {
+    for (u64 i = 0; i < positions.count-2; i++) {
         Vector2 p1 = positions.items[i];
         // +2, the ones right next to each other are definently not the biggest.
         for (u64 j = i+2; j < positions.count; j++) {
@@ -154,9 +167,48 @@ internal Solution solve_input(String input) {
 
 
     // part 2
+
+#if USE_MULTITHREADING
+
+
+    global_positions = positions;
+    atomic_counter = 0;
+
+    // my machine has 14 CPU's
+    #define NUM_TOTAL_THREADS 10
+    pthread_t ids[NUM_TOTAL_THREADS-1] = ZEROED;
+    for (u32 i = 0; i < Array_Len(ids); i++) {
+        s32 res = pthread_create(&ids[i], NULL, thread_grab_from_stack_until_done, NULL);
+        if (res != 0) {
+            errno = res;
+            perror("could not create thread");
+            exit(1);
+        }
+    }
+
+    thread_grab_from_stack_until_done(NULL);
+
+    for (u32 i = 0; i < Array_Len(ids); i++) {
+        s32 res = pthread_join(ids[i], NULL);
+        if (res != 0) {
+            errno = res;
+            perror("could not join thread");
+            exit(1);
+        }
+    }
+
+    u64 max = 0;
+    for (u32 i = 0; i < positions.count-2; i++) {
+        if (max < result_array_for_threads[i]) max = result_array_for_threads[i];
+    }
+    // debug(max);
+    u64 part_2 = max;
+
+#else
+
     u64 max_rectanlge_that_fits = 0;
 
-    for (u64 i = 0; i < positions.count-1; i++) {
+    for (u64 i = 0; i < positions.count-2; i++) {
         Vector2 p1 = positions.items[i];
         // +2, the ones right next to each other are definently not the biggest.
         for (u64 j = i+2; j < positions.count; j++) {
@@ -172,6 +224,8 @@ internal Solution solve_input(String input) {
     }
 
     u64 part_2 = max_rectanlge_that_fits;
+
+#endif
 
 
     Solution solution = {
@@ -192,7 +246,7 @@ int main(void) {
 
     Do_Input();
 
-    // Perf_Input(Get_Input(), 100);
+    // Perf_Input(Get_Input(), 1000);
 
     printf("======================================================================================\n");
     Scratch_Free();
