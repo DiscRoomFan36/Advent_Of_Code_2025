@@ -217,58 +217,63 @@ internal Solution solve_input(String input) {
     }
 
     // part 2
+
+    // this solution takes to long to do the real input.
     u32 min_number_of_presses_for_volts = 0;
-    for (u64 machine_index = 0; machine_index < machines.count; machine_index++) {
-        printf("%4ld/%4ld,    %f%%\n", machine_index, machines.count, ((f64)machine_index / machines.count) * 100);
-        fflush(stdout);
+    if (machines.count <= 3) {
 
-        Machine machine = machines.items[machine_index];
+        for (u64 machine_index = 0; machine_index < machines.count; machine_index++) {
+            printf("%4ld/%4ld,    %f%%\n", machine_index, machines.count, ((f64)machine_index / machines.count) * 100);
+            fflush(stdout);
 
-        // these are the numbers were working with.
-        // {183,25,183,38,44,185,38}
+            Machine machine = machines.items[machine_index];
 
-        // this is enough
-        // u16 numbers[10] = ZEROED;
-        u32 numbers_count = machine.number_of_bits;
+            // these are the numbers were working with.
+            // {183,25,183,38,44,185,38}
 
-        // u64 projuct_of_jolts = 1;
-        // for (u32 i = 0; i < machine.voltages.count; i++) {
-        //     projuct_of_jolts *= machine.voltages.items[i];
-        // }
-        // debug(projuct_of_jolts);
+            // this is enough
+            // u16 numbers[10] = ZEROED;
+            u32 numbers_count = machine.number_of_bits;
 
-        // do a greedy recursive algorithum.
+            // u64 projuct_of_jolts = 1;
+            // for (u32 i = 0; i < machine.voltages.count; i++) {
+            //     projuct_of_jolts *= machine.voltages.items[i];
+            // }
+            // debug(projuct_of_jolts);
 
-        ASSERT(machine.buttons.count <= MAX_NUMBER_OF_BUTTONS);
+            // do a greedy recursive algorithum.
+
+            ASSERT(machine.buttons.count <= MAX_NUMBER_OF_BUTTONS);
 
 
-        // sort the buttons by witch ones give the most jolts.
-        All_Buttons buttons_array = ZEROED;
-        buttons_array.buttons_count = machine.buttons.count;
-        for (u32 i = 0; i < machine.buttons.count; i++) {
-            u16 button = machine.buttons.items[i];
+            // sort the buttons by witch ones give the most jolts.
+            All_Buttons buttons_array = ZEROED;
+            buttons_array.buttons_count = machine.buttons.count;
+            for (u32 i = 0; i < machine.buttons.count; i++) {
+                u16 button = machine.buttons.items[i];
 
-            for (u32 j = 0; j < numbers_count; j++) {
-                if (button & (1 << j)) {
-                    buttons_array.b[i].bits[j] = 1;
-                    buttons_array.b[i].bit_count += 1;
+                for (u32 j = 0; j < numbers_count; j++) {
+                    if (button & (1 << j)) {
+                        buttons_array.b[i].bits[j] = 1;
+                        buttons_array.b[i].bit_count += 1;
+                    }
                 }
             }
+
+            qsort(buttons_array.b, machine.buttons.count, sizeof(buttons_array.b[0]), compare_Button_Bit_Array);
+
+            Counts final_counts = ZEROED;
+            for (u32 i = 0; i < machine.voltages.count; i++) {
+                final_counts.c[i] = machine.voltages.items[i];
+            }
+
+
+            Counts inital_counts = ZEROED;
+            s32 min_presses = find_minimum_number_of_button_presses(&final_counts, &buttons_array, &inital_counts, 0, 0);
+            ASSERT(min_presses != -1);
+            // debug(min_presses);
+            min_number_of_presses_for_volts += min_presses;
         }
-
-        qsort(buttons_array.b, machine.buttons.count, sizeof(buttons_array.b[0]), compare_Button_Bit_Array);
-
-        Counts final_counts = ZEROED;
-        for (u32 i = 0; i < machine.voltages.count; i++) {
-            final_counts.c[i] = machine.voltages.items[i];
-        }
-
-
-        Counts inital_counts = ZEROED;
-        s32 min_presses = find_minimum_number_of_button_presses(&final_counts, &buttons_array, &inital_counts, 0, 0);
-        ASSERT(min_presses != -1);
-        // debug(min_presses);
-        min_number_of_presses_for_volts += min_presses;
     }
 
 
@@ -288,7 +293,7 @@ int main(void) {
 
     Do_Example(7, 33);
 
-    // Do_Input();
+    Do_Input();
 
     // Perf_Input(Get_Input(), 10);
 
