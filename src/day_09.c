@@ -63,6 +63,9 @@ internal bool rectangle_fully_enclosed(Vector2_Array positions, Vector2 p1, Vect
     s32 max_y = Max(p1.y, p2.y);
 
     // check if there is a point inside of this
+    //
+    // the line intersection check dose the same thing,
+    // but doing this check first makes the whole thing 2x faster.
     for (u32 i = 0; i < positions.count; i++) {
         Vector2 point = positions.items[i];
         // if a point is in the middle of the rectangle were making...
