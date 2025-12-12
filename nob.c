@@ -59,13 +59,13 @@ int main(int argc, char **argv) {
 
 
     // TODO make this a command line arg
-    #define BESTED_PATH "/home/fletcher/Programming/C-things/Bested.h/Bested.h"
-    if (file_exists(BESTED_PATH) == 1) {
-        cmd_append(&cmd, "cp");
-        cmd_append(&cmd, BESTED_PATH);
-        cmd_append(&cmd, THIRDPARTY_FOLDER"Bested.h");
-        if (!cmd_run(&cmd)) return 1;
-    }
+    // #define BESTED_PATH "/home/fletcher/Programming/C-things/Bested.h/Bested.h"
+    // if (file_exists(BESTED_PATH) == 1) {
+    //     cmd_append(&cmd, "cp");
+    //     cmd_append(&cmd, BESTED_PATH);
+    //     cmd_append(&cmd, THIRDPARTY_FOLDER"Bested.h");
+    //     if (!cmd_run(&cmd)) return 1;
+    // }
 
     mkdir_if_not_exists(BUILD_FOLDER);
 

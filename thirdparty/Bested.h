@@ -1359,9 +1359,13 @@ s64 String_Find_Index_Of(String s, String needle) {
 
     if (needle.length == 1) return String_Find_Index_Of_Char(s, needle.data[0]);
 
+    s64 absolute_index = 0;
+
     while (true) {
         s64 index = String_Find_Index_Of_Char(s, needle.data[0]);
         if (index == -1) return -1;
+
+        absolute_index += index;
 
         // check if not enough room for needle
         if (s.length - index < needle.length) return -1;
@@ -1374,10 +1378,14 @@ s64 String_Find_Index_Of(String s, String needle) {
             }
         }
 
-        if (flag) return index;
+        if (flag) return absolute_index;
+
+        absolute_index += 1;
 
         s.data   += index + 1;
         s.length -= index + 1;
+
+
     }
 
     return -1;
