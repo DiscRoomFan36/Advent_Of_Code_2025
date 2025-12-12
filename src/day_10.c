@@ -111,8 +111,6 @@ internal Solution solve_input(String input) {
 
     // TODO("allocators");
 
-    // debug_break();
-
     String_Array lines = string_split_by(input, "\n");
     for (u64 line_index = 0; line_index < lines.count; line_index++) {
         String line = lines.items[line_index];
@@ -179,9 +177,6 @@ internal Solution solve_input(String input) {
         Array_Append(&machines, machine);
     }
 
-
-
-    // debug_break();
 
     // part 1
     s64 total_number_of_presses = 0;
